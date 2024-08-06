@@ -1,5 +1,5 @@
-import {NextResponse} from 'next/server'
-import OpenAI from "openai"
+import { NextResponse } from "next/server";
+import OpenAI from "openai";
 
 const systemPrompt = `System Prompt for Headstarter Customer Support AI
 
@@ -62,19 +62,19 @@ Examples of Common User Queries:
 
 End of Prompt
 
-Remember: Always maintain a friendly and helpful demeanor, and strive to provide clear, concise, and accurate information to ensure a positive user experience on Headstarter.`
+Remember: Always maintain a friendly and helpful demeanor, and strive to provide clear, concise, and accurate information to ensure a positive user experience on Headstarter.`;
 
 export async function POST(req) {
-    const openai = new OpenAI()
-    const data = await req.json()
+  const openai = new OpenAI();
+  const data = await req.json();
 
-    const completion = await openai.chat.completions.create({
-        messages: [{"role": "system", "content":  systemPrompt},...data],
-        model: "gpt-4o-mini",
-      });
-    
-    return NextResponse.json(
-        {message: completion.choices[0].message.content},
-        {status: 200},
-    )
+  const completion = await openai.chat.completions.create({
+    messages: [{ role: "system", content: systemPrompt }, ...data], //put all the content of the chat in the data array
+    model: "gpt-4o-mini",
+  });
+
+  return NextResponse.json(
+    { message: completion.choices[0].message.content },
+    { status: 200 } //status 200 means everything is okay
+  );
 }
