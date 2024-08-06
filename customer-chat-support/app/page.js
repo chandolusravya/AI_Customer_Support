@@ -1,8 +1,9 @@
 "use client";
 import { Box, Stack, TextField, Button } from "@mui/material";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function Home() {
+  // all messages in the chat
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -10,32 +11,84 @@ export default function Home() {
         "Hi! I'm the Headstarter support assistant. How can I help you today?",
     },
   ]);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(""); // User input
+  const [isLoading, setIsLoading] = useState(false);
 
   const sendMessage = async () => {
-    setMessage(""); //empty out the message input field as soon as we send a message
-    setMessages((messages) => [
-      //add the user message to the messages array
-      ...messages,
-      { role: "user", content: message },
-    ]);
+    if (!message.trim() || isLoading) return; // Don't send empty messages or if already sending
+    setIsLoading(true);
 
-    //send the user message to the server and get the response
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify([...messages, { role: "user", content: message }]),
-    });
-
-    //add the assistant's response to the messages array
-    const data = await response.json();
+    setMessage(""); // Clear input field
     setMessages((messages) => [
       ...messages,
-      { role: "assistant", content: data.message },
+      { role: "user", content: message }, // Add user message
+      { role: "assistant", content: "" }, // Placeholder for the assistant's response
     ]);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify([...messages, { role: "user", content: message }]),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const reader = response.body.getReader(); // Read the response as a stream
+      const decoder = new TextDecoder(); // Decode the stream as text
+
+      while (true) {
+        // Read the stream until it's done
+        const { done, value } = await reader.read();
+        if (done) break;
+        const text = decoder.decode(value, { stream: true }); // Decode the chunk of text
+        setMessages((messages) => {
+          // Update the last message with the new text
+          let lastMessage = messages[messages.length - 1];
+          let otherMessages = messages.slice(0, messages.length - 1);
+          return [
+            ...otherMessages,
+            { ...lastMessage, content: lastMessage.content + text },
+          ]; //taking the content of the last message and adding the generated text to the end of it
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setMessages((messages) => [
+        ...messages,
+        {
+          role: "assistant",
+          content:
+            "I'm sorry, but I encountered an error. Please try again later.",
+        },
+      ]);
+    }
+
+    setIsLoading(false);
   };
+
+  // Send message when Enter is pressed (without Shift)
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
+    }
+  };
+
+  const messagesEndRef = useRef(null); // Ref for scrolling to the bottom of the chat
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Scroll to the bottom of the chat when new messages are added
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   return (
     <Box
@@ -85,6 +138,7 @@ export default function Home() {
               </Box>
             </Box>
           ))}
+          <div ref={messagesEndRef} />
         </Stack>
         <Stack direction={"row"} spacing={2}>
           <TextField
@@ -92,9 +146,15 @@ export default function Home() {
             fullWidth
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyPress}
+            disabled={isLoading}
           />
-          <Button variant="contained" onClick={sendMessage}>
-            Send
+          <Button
+            variant="contained"
+            onClick={sendMessage}
+            disabled={isLoading}
+          >
+            {isLoading ? "Sending..." : "Send"}
           </Button>
         </Stack>
       </Stack>

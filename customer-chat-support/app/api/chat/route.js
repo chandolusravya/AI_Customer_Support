@@ -71,10 +71,29 @@ export async function POST(req) {
   const completion = await openai.chat.completions.create({
     messages: [{ role: "system", content: systemPrompt }, ...data], //put all the content of the chat in the data array
     model: "gpt-4o-mini",
+    stream: true,
   });
 
-  return NextResponse.json(
-    { message: completion.choices[0].message.content },
-    { status: 200 } //status 200 means everything is okay
-  );
+  const stream = new ReadableStream({
+    async start(controller) {
+      const encoder = new TextEncoder();
+      try {
+        //for await - the way to access the async generator
+        for await (const chunk of completion) {
+          //chunk is an object with the message from the assistant
+          const content = chunk.choices[0]?.delta?.content;
+          if (content) {
+            const text = encoder.encode(content);
+            controller.enqueue(text);
+          }
+        }
+      } catch (error) {
+        controller.error(error);
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new NextResponse(stream);
 }
