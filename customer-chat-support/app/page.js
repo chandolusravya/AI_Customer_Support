@@ -1,6 +1,8 @@
 "use client";
 import { Box, Stack, TextField, Button, Typography } from "@mui/material";
 import { useState, useRef, useEffect } from "react";
+import { Fab } from "@mui/material";
+import { IoArrowUp } from "react-icons/io5";
 
 export default function Home() {
   // all messages in the chat
@@ -106,6 +108,7 @@ export default function Home() {
       <Typography
         variant="h2"
         sx={{
+          mt: 2,
           mb: 2,
           fontWeight: "bold",
           transform: "translateZ(0)",
@@ -153,11 +156,11 @@ export default function Home() {
               <Box
                 bgcolor={
                   message.role === "assistant"
-                    ? "primary.main"
-                    : "secondary.main"
+                    ? "secondary.main"
+                    : "primary.main"
                 }
-                color="white"
-                borderRadius={5}
+                color={message.role === "assistant" ? "black" : "white"}
+                borderRadius={3}
                 p={{ xs: 1.5, sm: 2 }}
                 maxWidth={{ xs: "80%", sm: "70%", md: "60%" }}
               >
@@ -172,9 +175,9 @@ export default function Home() {
           ))}
           <div ref={messagesEndRef} />
         </Stack>
-        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+        <Stack direction="row" spacing={2} sx={{ mt: 1, position: "relative" }}>
           <TextField
-            label="Message"
+            placeholder="Message..."
             fullWidth
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -182,14 +185,22 @@ export default function Home() {
             disabled={isLoading}
             multiline
           />
-          <Button
-            variant="contained"
+          <Fab
+            color="primary"
+            aria-label="send"
             onClick={sendMessage}
-            disabled={isLoading}
-            sx={{ minWidth: "80px" }}
+            disabled={isLoading || !message.trim()} //make the button disabled if the message is empty or if it's already sending
+            size="small"
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 10,
+            }}
           >
-            {isLoading ? "Sending..." : "Send"}
-          </Button>
+            <IoArrowUp size={20} />
+          </Fab>
         </Stack>
       </Stack>
     </Box>

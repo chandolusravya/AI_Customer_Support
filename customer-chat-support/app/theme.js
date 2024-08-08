@@ -8,13 +8,16 @@ const theme = createTheme({
   },
   palette: {
     background: {
-      main: "#F0F0F0",
+      main: "#FFFFFF",
     },
     primary: {
-      main: "#2B8EAA",
+      main: "#000000",
     },
     secondary: {
-      main: "#87B99D",
+      main: "#F2F2F2",
+    },
+    tertiary: {
+      main: "#2B8EAA",
     },
     dark: { main: "#333333" },
   },
@@ -29,7 +32,7 @@ const theme = createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          borderRadius: 10,
+          borderRadius: 40,
         },
       },
     },
