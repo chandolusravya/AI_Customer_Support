@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { BedrockRuntimeClient, ConverseStreamCommand } from "@aws-sdk/client-bedrock-runtime";
+import { BedrockRuntimeClient, InvokeModelWithResponseStreamCommand } from "@aws-sdk/client-bedrock-runtime";
 
 const systemPrompt = `Panora Customer Support AI System Prompt
 
@@ -76,34 +76,40 @@ export async function POST(req) {
   const data = await req.json();
   // Set the model ID, e.g., Claude 3 Haiku.
   const modelId = "anthropic.claude-3-haiku-20240307-v1:0";
-
-  // Start a conversation with the user message.
-  const userMessage = "Describe the purpose of a 'hello world' program in one line.";
-  const conversation = [
-    {
-      role: "user",
-      content: [{ text: userMessage }],
-    },
-  ];
+  console.log(data)
+  const payload = {
+    anthropic_version: "bedrock-2023-05-31",
+    max_tokens: 10000,
+    messages: [
+      {"role": "user", "content": "Hello there."},
+      {"role": "assistant", "content": "Hi, I'm Claude. How can I help you?"},
+      {"role": "user", "content": "Can you explain LLMs in plain English?"},
+    ],
+  }
 
   // Create a command with the model ID, the message, and a basic configuration.
-  const command = new ConverseStreamCommand({
+  const command = new InvokeModelWithResponseStreamCommand({
+    contentType: "application/json",
+    body: JSON.stringify(payload),
     modelId,
-    messages: conversation,
-    inferenceConfig: { maxTokens: 512, temperature: 0.5, topP: 0.9 },
   });
+  
   const stream = new ReadableStream({
     async start(controller) {
       try {
         // Send the command to the model and wait for the response
         const response = await client.send(command);
-    
+        let completeMessage = "";
         // Extract and print the streamed response text in real-time.
-        for await (const item of response.stream) {
-          if (item.contentBlockDelta) {
-            const text = item.contentBlockDelta.delta?.text
+        for await (const item of response.body) {
+          const chunk = JSON.parse(new TextDecoder().decode(item.chunk.bytes));
+          const chunk_type = chunk.type;
+      
+          if (chunk_type === "content_block_delta") {
+            const text = chunk.delta.text;
+            completeMessage = completeMessage + text;
+            controller.enqueue(text);
             process.stdout.write(text);
-            controller.enqueue(text)
           }
         }
       } catch (err) {

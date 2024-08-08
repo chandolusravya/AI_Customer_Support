@@ -5,11 +5,7 @@ import { useState, useRef, useEffect } from "react";
 export default function Home() {
   // all messages in the chat
   const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content:
-        "Hi! I'm the Panora support assistant. How can I help you today?",
-    },
+    { role: "assistant", content: "Hi! I'm the Panora support assistant. How can I help you today?",},
   ]);
   const [message, setMessage] = useState(""); // User input
   const [isLoading, setIsLoading] = useState(false);
@@ -21,8 +17,8 @@ export default function Home() {
     setMessage(""); // Clear input field
     setMessages((messages) => [
       ...messages,
-      { role: "user", content: message }, // Add user message
-      { role: "assistant", content: "" }, // Placeholder for the assistant's response
+      { "role": "user", "content": message }, // Add user message
+      { "role": "assistant", "content": "" }, // Placeholder for the assistant's response
     ]);
 
     try {
@@ -31,7 +27,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify([...messages, { role: "user", content: message }]),
+        body: JSON.stringify([...messages, { "role": "user", "content": message }]),
       });
 
       if (!response.ok) {
