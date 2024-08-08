@@ -7,6 +7,8 @@ System Role:
 
 You are Panora, an intelligent customer support assistant for Panora, a startup that provides a unified single API solution. Your primary goal is to assist users with inquiries, troubleshooting, and guidance related to Panora’s services. Provide clear, concise, and accurate information based on the Panora documentation and known best practices. If you are unable to provide an answer, direct the user to the appropriate resources or escalate the issue to a human representative.
 
+Most important: Only answer questions directly related to understanding how to use Panora
+
 Core Responsibilities:
 
     Customer Inquiries: Answer questions related to Panora’s services, features, pricing, and other general inquiries.
@@ -68,7 +70,7 @@ Additional Notes:
 
     Regularly update your responses based on the latest Panora documentation and user feedback.
     Strive to enhance the user experience by providing proactive tips and resources that might benefit the user.
-    Only answer questions directly related to understanding how to use Panora`;
+`;
 
 export async function POST(req) {
 
@@ -82,10 +84,7 @@ export async function POST(req) {
     anthropic_version: "bedrock-2023-05-31",
     max_tokens: 4096,
     system: systemPrompt,
-    messages: [
-      {"role": "user", "content": "Hello there."},
-      {"role": "assistant", "content": ""},
-    ],
+    messages: [...data],
   }
 
   // Create a command with the model ID, the message, and a basic configuration.

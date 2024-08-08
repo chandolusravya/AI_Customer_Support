@@ -4,9 +4,7 @@ import { useState, useRef, useEffect } from "react";
 
 export default function Home() {
   // all messages in the chat
-  const [messages, setMessages] = useState([
-    { role: "assistant", content: "Hi! I'm the Panora support assistant. How can I help you today?",},
-  ]);
+  const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState(""); // User input
   const [isLoading, setIsLoading] = useState(false);
 
