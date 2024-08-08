@@ -1,8 +1,10 @@
 "use client";
-import { Box, Stack, TextField, Button, Typography } from "@mui/material";
+import { Box, Stack, TextField, Link, Typography } from "@mui/material";
 import { useState, useRef, useEffect } from "react";
 import { Fab } from "@mui/material";
 import { IoArrowUp } from "react-icons/io5";
+import ReactMarkdown from "react-markdown"; //to render markdown in the assistant's responses
+import remarkGfm from "remark-gfm"; //to enable GitHub Flavored Markdown
 
 export default function Home() {
   // all messages in the chat
@@ -10,7 +12,7 @@ export default function Home() {
     {
       role: "assistant",
       content:
-        "Hi! I'm the Headstarter support assistant. How can I help you today?",
+        "Hi! I'm PanoraBot. How can I help you today? You can ask me anything about Panora or chat with me to see how I can assist you.",
     },
   ]);
   const [message, setMessage] = useState(""); // User input
@@ -164,12 +166,36 @@ export default function Home() {
                 p={{ xs: 1.5, sm: 2 }}
                 maxWidth={{ xs: "80%", sm: "70%", md: "60%" }}
               >
-                <Typography
-                  variant="body1"
-                  fontSize={{ xs: "0.9rem", sm: "1rem" }}
-                >
-                  {message.content}
-                </Typography>
+                {message.role === "assistant" ? (
+                  <ReactMarkdown //assistant's messages can contain markdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ node, ...props }) => (
+                        <Typography variant="body1" {...props} />
+                      ),
+                      a: (
+                        { node, ...props } //handle how links are rendered
+                      ) => (
+                        <Link
+                          href={props.href}
+                          target="_blank" //this and the next line make the link open in a new tab
+                          rel="noopener noreferrer"
+                          color="tertiary.main"
+                          variant="body1"
+                          sx={{
+                            textDecoration: "underline",
+                          }}
+                        >
+                          {props.children}
+                        </Link>
+                      ),
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                ) : (
+                  <Typography variant="body1">{message.content}</Typography>
+                )}
               </Box>
             </Box>
           ))}
