@@ -1,6 +1,8 @@
 "use client";
-import { Box, Stack, TextField, Button } from "@mui/material";
+import { Box, Stack, TextField, Button, Typography } from "@mui/material";
 import { useState, useRef, useEffect } from "react";
+import { Fab } from "@mui/material";
+import { IoArrowUp } from "react-icons/io5";
 
 export default function Home() {
   // all messages in the chat
@@ -92,34 +94,61 @@ export default function Home() {
 
   return (
     <Box
-      width="100vw"
-      height="100vh"
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
-      overflow="hidden" // Prevent body scroll
+      sx={{
+        width: "100vw",
+        height: "100vh",
+        bgcolor: "background.main",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
     >
+      <Typography
+        variant="h2"
+        sx={{
+          mt: 2,
+          mb: 2,
+          fontWeight: "bold",
+          transform: "translateZ(0)",
+          transition: "transform 0.4s ease-out",
+          "&:hover": {
+            transform: "translateY(-5px) translateZ(0)",
+          },
+          textShadow: "2px 2px 4px rgba(0, 0, 0, 0.2)",
+        }}
+      >
+        Panora Chatbot{" "}
+      </Typography>
       <Stack
-        direction={"column"}
-        width="500px"
-        height="700px"
-        border="1px solid black"
-        p={2}
-        spacing={3}
-        overflow="hidden"
+        sx={{
+          direction: "column",
+          borderRadius: 4,
+          width: { md: "95vw", sm: "90vw", xs: "90vw" },
+          height: "90vh",
+          border: "1px solid",
+          borderColor: "dark.main",
+          p: { xs: 1, sm: 2 },
+          spacing: 3,
+          overflow: "hidden",
+          mb: 2,
+        }}
       >
         <Stack
-          direction={"column"}
-          spacing={2}
-          flexGrow={1}
-          overflow="auto"
-          maxHeight="100%"
+          direction="column"
+          spacing={3}
+          sx={{
+            overflow: "auto",
+            maxHeight: "100%",
+            flexGrow: 1,
+            scrollbarWidth: "thin",
+          }}
         >
           {messages.map((message, index) => (
             <Box
               key={index}
-              display="flex"
+              sx={{ display: "flex", mb: 2 }}
               justifyContent={
                 message.role === "assistant" ? "flex-start" : "flex-end"
               }
@@ -127,35 +156,51 @@ export default function Home() {
               <Box
                 bgcolor={
                   message.role === "assistant"
-                    ? "primary.main"
-                    : "secondary.main"
+                    ? "secondary.main"
+                    : "primary.main"
                 }
-                color="white"
-                borderRadius={16}
-                p={3}
+                color={message.role === "assistant" ? "black" : "white"}
+                borderRadius={3}
+                p={{ xs: 1.5, sm: 2 }}
+                maxWidth={{ xs: "80%", sm: "70%", md: "60%" }}
               >
-                {message.content}
+                <Typography
+                  variant="body1"
+                  fontSize={{ xs: "0.9rem", sm: "1rem" }}
+                >
+                  {message.content}
+                </Typography>
               </Box>
             </Box>
           ))}
           <div ref={messagesEndRef} />
         </Stack>
-        <Stack direction={"row"} spacing={2}>
+        <Stack direction="row" spacing={2} sx={{ mt: 1, position: "relative" }}>
           <TextField
-            label="Message"
+            placeholder="Message..."
             fullWidth
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyPress}
             disabled={isLoading}
+            multiline
           />
-          <Button
-            variant="contained"
+          <Fab
+            color="primary"
+            aria-label="send"
             onClick={sendMessage}
-            disabled={isLoading}
+            disabled={isLoading || !message.trim()} //make the button disabled if the message is empty or if it's already sending
+            size="small"
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 10,
+            }}
           >
-            {isLoading ? "Sending..." : "Send"}
-          </Button>
+            <IoArrowUp size={20} />
+          </Fab>
         </Stack>
       </Stack>
     </Box>
