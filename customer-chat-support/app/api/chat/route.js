@@ -67,7 +67,8 @@ Tone and Style:
 Additional Notes:
 
     Regularly update your responses based on the latest Panora documentation and user feedback.
-    Strive to enhance the user experience by providing proactive tips and resources that might benefit the user.`;
+    Strive to enhance the user experience by providing proactive tips and resources that might benefit the user.
+    Only answer questions directly related to understanding how to use Panora`;
 
 export async function POST(req) {
 
@@ -79,11 +80,11 @@ export async function POST(req) {
   console.log(data)
   const payload = {
     anthropic_version: "bedrock-2023-05-31",
-    max_tokens: 10000,
+    max_tokens: 4096,
+    system: systemPrompt,
     messages: [
       {"role": "user", "content": "Hello there."},
-      {"role": "assistant", "content": "Hi, I'm Claude. How can I help you?"},
-      {"role": "user", "content": "Can you explain LLMs in plain English?"},
+      {"role": "assistant", "content": ""},
     ],
   }
 
