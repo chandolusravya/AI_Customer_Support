@@ -1,5 +1,14 @@
 "use client";
-import { Box, Stack, TextField, Link, Typography } from "@mui/material";
+import {
+  Box,
+  Stack,
+  TextField,
+  Link,
+  Typography,
+  Popover,
+  Button,
+  Divider,
+} from "@mui/material";
 import { useState, useRef, useEffect } from "react";
 import { Fab } from "@mui/material";
 import { IoArrowUp } from "react-icons/io5";
@@ -17,6 +26,24 @@ export default function Home() {
   ]);
   const [message, setMessage] = useState(""); // User input
   const [isLoading, setIsLoading] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null); // Anchor element for the popover
+  const popoverOpen = Boolean(anchorEl); // Check if the popover is open
+  const [selectedAI, setSelectedAI] = useState("Choose AI");
+
+  const handleChooseAI = (event) => {
+    //open the popover
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    //close the popover
+    setAnchorEl(null);
+  };
+
+  const handleSelectAI = (aiName) => {
+    setSelectedAI(aiName);
+    handleClose();
+  };
 
   const sendMessage = async () => {
     if (!message.trim() || isLoading) return; // Don't send empty messages or if already sending
@@ -123,6 +150,34 @@ export default function Home() {
       >
         Panora Chatbot{" "}
       </Typography>
+      <Button variant="contained" sx={{ mb: 2 }} onClick={handleChooseAI}>
+        {selectedAI}
+      </Button>
+      <Popover
+        open={popoverOpen}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+      >
+        <Box sx={{ display: "flex", flexDirection: "column" }}>
+          <Button
+            sx={{ p: 2, borderRadius: 0 }}
+            onClick={() => handleSelectAI("Open AI")}
+          >
+            Open AI
+          </Button>
+          <Divider />
+          <Button
+            sx={{ p: 2, borderRadius: 0 }}
+            onClick={() => handleSelectAI("Claude 3")}
+          >
+            Claude 3
+          </Button>
+        </Box>
+      </Popover>
       <Stack
         sx={{
           direction: "column",
