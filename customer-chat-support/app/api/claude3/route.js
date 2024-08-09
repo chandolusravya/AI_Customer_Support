@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
-import { BedrockRuntimeClient, InvokeModelWithResponseStreamCommand } from "@aws-sdk/client-bedrock-runtime";
+import {
+  BedrockRuntimeClient,
+  InvokeModelWithResponseStreamCommand,
+} from "@aws-sdk/client-bedrock-runtime";
 
-const systemPrompt = `Panora Customer Support AI System Prompt
+const systemPrompt = `PanoraBot Customer Support AI System Prompt
 
 System Role:
 
-You are Panora, an intelligent customer support assistant for Panora, a startup that provides a unified single API solution. Your primary goal is to assist users with inquiries, troubleshooting, and guidance related to Panora’s services. Provide clear, concise, and accurate information based on the Panora documentation and known best practices. If you are unable to provide an answer, direct the user to the appropriate resources or escalate the issue to a human representative.
+You are PanoraBot, an intelligent customer support assistant for Panora, a startup that provides a unified single API solution. Your primary goal is to assist users with inquiries, troubleshooting, and guidance related to Panora’s services. Provide clear, concise, and accurate information based on the Panora documentation and known best practices. If you are unable to provide an answer, direct the user to the appropriate resources or escalate the issue to a human representative.
 
 Most important: Only answer questions directly related to understanding how to use Panora
 
@@ -70,10 +73,14 @@ Additional Notes:
 
     Regularly update your responses based on the latest Panora documentation and user feedback.
     Strive to enhance the user experience by providing proactive tips and resources that might benefit the user.
+
+Resources:
+  Documentation: https://docs.panora.dev/welcome
+  Discord Community: https://discord.com/invite/PH5k7gGubt
+  GitHub Repository: https://github.com/panoratech/Panora
 `;
 
 export async function POST(req) {
-
   // Create a Bedrock Runtime client in the AWS Region you want to use.
   const client = new BedrockRuntimeClient({ region: "us-west-2" }, {credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -82,13 +89,13 @@ export async function POST(req) {
   const data = await req.json();
   // Set the model ID, e.g., Claude 3 Haiku.
   const modelId = "anthropic.claude-3-haiku-20240307-v1:0";
-  console.log(data)
+  console.log(data);
   const payload = {
     anthropic_version: "bedrock-2023-05-31",
     max_tokens: 4096,
     system: systemPrompt,
     messages: [...data],
-  }
+  };
 
   // Create a command with the model ID, the message, and a basic configuration.
   const command = new InvokeModelWithResponseStreamCommand({
@@ -96,7 +103,7 @@ export async function POST(req) {
     body: JSON.stringify(payload),
     modelId,
   });
-  
+
   const stream = new ReadableStream({
     async start(controller) {
       try {
@@ -107,7 +114,7 @@ export async function POST(req) {
         for await (const item of response.body) {
           const chunk = JSON.parse(new TextDecoder().decode(item.chunk.bytes));
           const chunk_type = chunk.type;
-      
+
           if (chunk_type === "content_block_delta") {
             const text = chunk.delta.text;
             completeMessage = completeMessage + text;
@@ -116,12 +123,12 @@ export async function POST(req) {
           }
         }
       } catch (err) {
-        controller.error(err)
+        controller.error(err);
       } finally {
-        controller.close()
+        controller.close();
       }
-    }
-  })
+    },
+  });
 
   return new NextResponse(stream);
 }
