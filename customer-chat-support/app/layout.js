@@ -7,9 +7,9 @@ import theme from "./theme";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Headstarter Customer Support AI",
+  title: "Panora Customer Support AI",
   description:
-    "Customer support AI for Headstarter, an interview practice platform.",
+    "Customer support AI for Panora, an open-source unified API platform.",
 };
 
 export default function RootLayout({ children }) {
