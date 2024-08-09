@@ -75,7 +75,10 @@ Additional Notes:
 export async function POST(req) {
 
   // Create a Bedrock Runtime client in the AWS Region you want to use.
-  const client = new BedrockRuntimeClient({ region: "us-west-2" });
+  const client = new BedrockRuntimeClient({ region: "us-west-2" }, {credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  }});
   const data = await req.json();
   // Set the model ID, e.g., Claude 3 Haiku.
   const modelId = "anthropic.claude-3-haiku-20240307-v1:0";
