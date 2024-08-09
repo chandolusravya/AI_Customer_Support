@@ -1,12 +1,43 @@
 "use client";
-import { Box, Stack, TextField, Button } from "@mui/material";
+import {
+  Box,
+  Stack,
+  TextField,
+  Link,
+  Typography,
+  Popover,
+  Button,
+  Divider,
+} from "@mui/material";
 import { useState, useRef, useEffect } from "react";
+import { Fab } from "@mui/material";
+import { IoArrowUp } from "react-icons/io5";
+import ReactMarkdown from "react-markdown"; //to render markdown in the assistant's responses
+import remarkGfm from "remark-gfm"; //to enable GitHub Flavored Markdown
 
 export default function Home() {
   // all messages in the chat
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState(""); // User input
   const [isLoading, setIsLoading] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null); // Anchor element for the popover
+  const popoverOpen = Boolean(anchorEl); // Check if the popover is open
+  const [selectedAI, setSelectedAI] = useState("Choose AI");
+
+  const handleChooseAI = (event) => {
+    //open the popover
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    //close the popover
+    setAnchorEl(null);
+  };
+
+  const handleSelectAI = (aiName) => {
+    setSelectedAI(aiName);
+    handleClose();
+  };
 
   const sendMessage = async () => {
     if (!message.trim() || isLoading) return; // Don't send empty messages or if already sending
@@ -20,7 +51,7 @@ export default function Home() {
     ]);
 
     try {
-      const response = await fetch("/api/chat", {
+      const response = await fetch("/api/openai", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -86,34 +117,89 @@ export default function Home() {
 
   return (
     <Box
-      width="100vw"
-      height="100vh"
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
-      overflow="hidden" // Prevent body scroll
+      sx={{
+        width: "100vw",
+        height: "100vh",
+        bgcolor: "background.main",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
     >
+      <Typography
+        variant="h2"
+        sx={{
+          mt: 2,
+          mb: 2,
+          fontWeight: "bold",
+          transform: "translateZ(0)",
+          transition: "transform 0.4s ease-out",
+          "&:hover": {
+            transform: "translateY(-5px) translateZ(0)",
+          },
+          textShadow: "2px 2px 4px rgba(0, 0, 0, 0.2)",
+        }}
+      >
+        Panora Chatbot{" "}
+      </Typography>
+      <Button variant="contained" sx={{ mb: 2 }} onClick={handleChooseAI}>
+        {selectedAI}
+      </Button>
+      <Popover
+        open={popoverOpen}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+      >
+        <Box sx={{ display: "flex", flexDirection: "column" }}>
+          <Button
+            sx={{ p: 2, borderRadius: 0 }}
+            onClick={() => handleSelectAI("Open AI")}
+          >
+            Open AI
+          </Button>
+          <Divider />
+          <Button
+            sx={{ p: 2, borderRadius: 0 }}
+            onClick={() => handleSelectAI("Claude 3")}
+          >
+            Claude 3
+          </Button>
+        </Box>
+      </Popover>
       <Stack
-        direction={"column"}
-        width="500px"
-        height="700px"
-        border="1px solid black"
-        p={2}
-        spacing={3}
-        overflow="hidden"
+        sx={{
+          direction: "column",
+          borderRadius: 4,
+          width: { md: "95vw", sm: "90vw", xs: "90vw" },
+          height: "90vh",
+          border: "1px solid",
+          borderColor: "dark.main",
+          p: { xs: 1, sm: 2 },
+          spacing: 3,
+          overflow: "hidden",
+          mb: 2,
+        }}
       >
         <Stack
-          direction={"column"}
-          spacing={2}
-          flexGrow={1}
-          overflow="auto"
-          maxHeight="100%"
+          direction="column"
+          spacing={3}
+          sx={{
+            overflow: "auto",
+            maxHeight: "100%",
+            flexGrow: 1,
+            scrollbarWidth: "thin",
+          }}
         >
           {messages.map((message, index) => (
             <Box
               key={index}
-              display="flex"
+              sx={{ display: "flex", mb: 2 }}
               justifyContent={
                 message.role === "assistant" ? "flex-start" : "flex-end"
               }
@@ -121,35 +207,75 @@ export default function Home() {
               <Box
                 bgcolor={
                   message.role === "assistant"
-                    ? "primary.main"
-                    : "secondary.main"
+                    ? "secondary.main"
+                    : "primary.main"
                 }
-                color="white"
-                borderRadius={16}
-                p={3}
+                color={message.role === "assistant" ? "black" : "white"}
+                borderRadius={3}
+                p={{ xs: 1.5, sm: 2 }}
+                maxWidth={{ xs: "80%", sm: "70%", md: "60%" }}
               >
-                {message.content}
+                {message.role === "assistant" ? (
+                  <ReactMarkdown //assistant's messages can contain markdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ node, ...props }) => (
+                        <Typography variant="body1" {...props} />
+                      ),
+                      a: (
+                        { node, ...props } //handle how links are rendered
+                      ) => (
+                        <Link
+                          href={props.href}
+                          target="_blank" //this and the next line make the link open in a new tab
+                          rel="noopener noreferrer"
+                          color="tertiary.main"
+                          variant="body1"
+                          sx={{
+                            textDecoration: "underline",
+                          }}
+                        >
+                          {props.children}
+                        </Link>
+                      ),
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                ) : (
+                  <Typography variant="body1">{message.content}</Typography>
+                )}
               </Box>
             </Box>
           ))}
           <div ref={messagesEndRef} />
         </Stack>
-        <Stack direction={"row"} spacing={2}>
+        <Stack direction="row" spacing={2} sx={{ mt: 1, position: "relative" }}>
           <TextField
-            label="Message"
+            placeholder="Message..."
             fullWidth
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyPress}
             disabled={isLoading}
+            multiline
           />
-          <Button
-            variant="contained"
+          <Fab
+            color="primary"
+            aria-label="send"
             onClick={sendMessage}
-            disabled={isLoading}
+            disabled={isLoading || !message.trim()} //make the button disabled if the message is empty or if it's already sending
+            size="small"
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 10,
+            }}
           >
-            {isLoading ? "Sending..." : "Send"}
-          </Button>
+            <IoArrowUp size={20} />
+          </Fab>
         </Stack>
       </Stack>
     </Box>
