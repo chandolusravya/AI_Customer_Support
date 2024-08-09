@@ -17,13 +17,7 @@ import remarkGfm from "remark-gfm"; //to enable GitHub Flavored Markdown
 
 export default function Home() {
   // all messages in the chat
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content:
-        "Hi! I'm PanoraBot. How can I help you today? You can ask me anything about Panora or chat with me to see how I can assist you.",
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState(""); // User input
   const [isLoading, setIsLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null); // Anchor element for the popover
@@ -52,8 +46,8 @@ export default function Home() {
     setMessage(""); // Clear input field
     setMessages((messages) => [
       ...messages,
-      { role: "user", content: message }, // Add user message
-      { role: "assistant", content: "" }, // Placeholder for the assistant's response
+      { "role": "user", "content": message }, // Add user message
+      { "role": "assistant", "content": "" }, // Placeholder for the assistant's response
     ]);
 
     try {
@@ -62,7 +56,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify([...messages, { role: "user", content: message }]),
+        body: JSON.stringify([...messages, { "role": "user", "content": message }]),
       });
 
       if (!response.ok) {
