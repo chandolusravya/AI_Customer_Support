@@ -3,6 +3,7 @@ import {
   BedrockRuntimeClient,
   InvokeModelWithResponseStreamCommand,
 } from "@aws-sdk/client-bedrock-runtime";
+import { generate } from "./utils";
 
 const systemPrompt = `PanoraBot Customer Support AI System Prompt
 
@@ -87,6 +88,7 @@ export async function POST(req) {
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
   }});
   const data = await req.json();
+  const res = await generate(data);
   // Set the model ID, e.g., Claude 3 Haiku.
   const modelId = "anthropic.claude-3-haiku-20240307-v1:0";
   console.log(data);
@@ -94,7 +96,7 @@ export async function POST(req) {
     anthropic_version: "bedrock-2023-05-31",
     max_tokens: 4096,
     system: systemPrompt,
-    messages: [...data],
+    messages: [...res],
   };
 
   // Create a command with the model ID, the message, and a basic configuration.
