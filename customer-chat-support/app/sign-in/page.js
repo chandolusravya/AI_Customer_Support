@@ -1,8 +1,24 @@
+"use client";
 import React from "react";
 import { Box, Typography, Button } from "@mui/material";
 import { FcGoogle } from "react-icons/fc";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 export default function SignIn() {
+  const router = useRouter();
+
+  const handleSignIn = async () => {
+    const result = await signIn('google', { redirect: false});
+
+    console.log("Sign-In Result:", result);
+
+    if (result?.ok) {
+      console.log("sucess/n");
+      router.push('/');
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -43,6 +59,7 @@ export default function SignIn() {
           boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
         }}
         startIcon={<FcGoogle />}
+        onClick={handleSignIn}
       >
         Sign In with Google
       </Button>
