@@ -5,3 +5,5 @@ Highlights:
 3. Seamless UI mimicking Panora's current UI
 4. Deployed using AWS EC2 servers
 5. Authentication with Google OAuth
+
+Demo: https://youtu.be/VXOk6GAL9To
